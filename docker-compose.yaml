@@ -1,0 +1,39 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - ./data:/data/db:rw
+    ports:
+      - 27017:27017
+    networks:
+      netboworks:
+        ipv4_address: 172.18.0.17
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8017:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@172.18.0.17:27017/
+    networks:
+      netboworks:
+        ipv4_address: 172.18.0.18
+
+# 设置同一条网络
+# 查看容器名称及其IP地址 docker inspect -f '{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq)
+# 选运行 docker network create --driver=bridge --subnet=172.18.0.0/24 --gateway=172.18.0.1 netbo-pre-existing-network
+networks:
+  netboworks:
+    external:
+      name: netbo-pre-existing-network
